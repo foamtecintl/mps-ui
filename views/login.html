@@ -1,0 +1,98 @@
+{{define "root-style"}}
+{{end}}
+{{define "root-layout"}}{{end}}
+{{define "root-body"}}
+<div id="body"></div>
+{{end}} {{define "root-script"}}
+<script>
+  Ext.onReady(function() {
+    var tb = new Ext.Toolbar({
+      columnWidth: 1,
+      items: [{
+        text: 'Menu',
+        iconCls: 'bmenu'
+      }]
+    });
+
+    var panel = new Ext.Panel({
+      renderTo: 'body',
+      title: 'MPS System',
+      style: '{text-align:center;}',
+      layout:'column'
+    });
+
+    var formLogin = new Ext.FormPanel({
+      labelWidth: 75,
+      frame:true,
+      width: 350,
+      defaults: {width: 230},
+      defaultType: 'textfield',
+      items: [
+        {
+          fieldLabel: 'Username',
+          name: 'username',
+          allowBlank:false,
+          id: 'username'
+        },
+        {
+          fieldLabel: 'Password',
+          name: 'password',
+          allowBlank:false,
+          inputType: 'password',
+          id: 'password'
+        }
+      ]
+    });
+
+    var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
+
+    var windowLogin = new Ext.Window({
+      title: 'Login',
+      width: 350,
+      height:150,
+      layout: 'fit',
+      closable: false,
+      plain:true,
+      bodyStyle:'padding:5px;',
+      buttonAlign:'center',
+      items: formLogin,
+      buttons: [{
+          text: 'Login',
+          handler: function() {
+            myMask.show();
+            var dataLogin = {
+              username: $('#username').val(),
+              password: $('#password').val()
+            }
+            $.ajax({
+              type: 'POST',
+              contentType: 'application/json; charset=utf-8',
+              dataType: "json",
+              url: '{{.api_url}}/api/security/login',
+              data: JSON.stringify(dataLogin),
+              success: function(result) {
+                localStorage.setItem('token' , 'Bearer ' + result.token);
+                localStorage.setItem('username' , result.username);
+                localStorage.setItem('role' , result.role);
+                window.location.href = '/mps';
+              },
+              error: function(err) {
+                myMask.hide();
+                var resErr = err.responseJSON;
+                Ext.MessageBox.show({
+                  title: 'Warning',
+                  msg: resErr.message,
+                  buttons: Ext.MessageBox.OK,
+                  animEl: 'mb9',
+                  icon: Ext.MessageBox.WARNING
+                });
+                formLogin.getForm().reset();
+              }
+            })
+          }
+      }]
+    });
+    windowLogin.show();
+  });
+</script>
+{{end}}
