@@ -1,0 +1,133 @@
+{{define "root-style"}}
+{{end}}
+{{define "root-body"}}
+<div id="body"></div>
+{{end}} {{define "root-script"}}
+<script>
+  Ext.onReady(function() {
+    var panel = new Ext.Panel({
+      renderTo: 'content',
+      layout: 'column',
+      items: [
+        {
+          columnWidth: .15,
+          html: '<div>&nbsp;</div>'
+        },
+        {
+          columnWidth: .7,
+          html: '<div id="gridGroup"></div>'
+        }
+      ]
+    });
+    
+    var store = new Ext.data.JsonStore({
+      fields: [
+        { name: 'id' },
+        { name: 'no' },
+        { name: 'groupName' },
+        { name: 'typeName' },
+        { name: 'totalPart' }
+      ],
+      root: 'groups',
+      totalProperty: 'totalGroups',
+      proxy: new Ext.data.HttpProxy({
+        method: 'GET',
+        type: 'json',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': localStorage.getItem('token')
+        },
+        url: '{{.api_url}}/api/mps/searchgroupslimit'
+      })
+    });
+
+    new Ext.grid.GridPanel({
+      renderTo: 'gridGroup',
+      height:500,
+      store: store,
+      trackMouseOver:false,
+      disableSelection:true,
+      loadMask: true,
+      title:'Group list for select to create forecast',
+      columns:[
+        {
+          id: 'id',
+          header: 'id',
+          dataIndex: 'id',
+          width    : 10,
+          hidden: true
+        },
+        {
+          id: 'no',
+          header: '#',
+          dataIndex: 'no',
+          width    : 50
+        },
+        {
+          id: 'groupName',
+          header: 'Group Name',
+          dataIndex: 'groupName',
+          sortable: true,
+          width    : 200
+        },
+        {
+          id: 'typeName',
+          header: 'Type Name',
+          dataIndex: 'typeName',
+          width    : 200
+        },
+        {
+          id: 'totalPart',
+          header: 'Total Part',
+          dataIndex: 'totalPart',
+          width    : 135
+        },
+        {
+          xtype: 'actioncolumn',
+          header: 'Create Forecast',
+          width: 100,
+          items: [
+            {
+              icon: '/-/core/extjs/examples/icons/fam/rss_go.png',
+              tooltip: 'go to infomation',
+              handler: function(grid, rowIndex, colIndex) {
+                var rec = store.getAt(rowIndex);
+                window.location.href = '/mps/createdate?id=' + rec.get('id');
+              }
+            }
+          ]
+        }
+      ],
+      bbar: new Ext.PagingToolbar({
+        pageSize: 20,
+        store: store,
+        displayInfo: true,
+        displayMsg: 'Displaying data {0} - {1} of {2}',
+        emptyMsg: "No data to display",
+        items: ['-',
+          {
+            xtype: 'textfield',
+            fieldLabel: 'Search',
+            name: 'search',
+            id: 'search',
+            value: '{{.search}}'
+          },
+          {
+            xtype: 'button',
+            name: 'btnSearch',
+            id: 'btnSearch',
+            text: 'Search',
+            pressed: true,
+            handler: function() {
+              window.location.href = '/mps/selectforecast?search=' + $('#search').val();
+            }
+          }
+        ]
+      })
+    });
+
+    store.baseParams = {searchText: '{{.search}}'};
+    store.load({params:{start:0, limit:20, searchText: '{{.search}}'}});
+  });
+</script>
+{{end}}

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"mps-go/pkg/view"
+	"mps-ui/pkg/view"
 	"net/http"
 )
 
@@ -12,11 +12,33 @@ func mpsHome(w http.ResponseWriter, r *http.Request) {
 	view.MpsHome(w, data)
 }
 
-func mpsCreateForcast(w http.ResponseWriter, r *http.Request) {
+func mpsSelectForecast(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"api_url": apiURL,
 	}
-	view.MpsCreateForcast(w, data)
+	search := r.URL.Query().Get("search")
+	data["search"] = search
+	view.MpsSelectForecast(w, data)
+}
+
+func mpsCreateForecast(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"api_url": apiURL,
+	}
+	id := r.URL.Query().Get("id")
+	dateT := r.URL.Query().Get("dateT")
+	data["id"] = id
+	data["dateT"] = dateT
+	view.MpsCreateForecast(w, data)
+}
+
+func mpsCreateDate(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"api_url": apiURL,
+	}
+	id := r.URL.Query().Get("id")
+	data["id"] = id
+	view.MpsCreateDate(w, data)
 }
 
 func mpsCreateGroup(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,110 @@
+{{define "root-style"}}
+<style>
+  .headerT {
+    background-color: #f1c40f;
+  }
+</style>
+{{end}}
+{{define "root-body"}}
+<div id="body"></div>
+{{end}} {{define "root-script"}}
+<script>
+  Ext.onReady(function() {
+    var panel = new Ext.Panel({
+      renderTo: 'content',
+      layout: 'column',
+      items: [
+        {
+          columnWidth: 1,
+          html: '<div id="gridGroup"></div>'
+        },
+        {
+          columnWidth: 1,
+          html: '<div id="formUpload"></div>'
+        }
+      ]
+    });
+
+    var dateArr = '{{.dateT}}';
+    var dateSplit = dateArr.split(',');
+    var columnT = [
+      {
+        id: 'part',
+        header: 'Part',
+        dataIndex: 'part',
+        width    : 150,
+        locked: true
+      }
+    ];
+    var i = 0;
+    for(i = 0; i < dateSplit.length -1; i++) {
+      var ob = {
+          id: 'date'+i,
+          header: dateSplit[i],
+          dataIndex: 'date'+i,
+          width    : 100,
+          editor: {
+            xtype: 'textfield'
+          }
+      }
+      columnT.push(ob);
+    }
+
+    var storeData = {
+      dataForecast: [
+        {part: '1234', id: 1},
+        {part: '1234', id: 2},
+        {part: '1234', id: 3},
+        {part: '1234', id: 4},
+        {part: '1234', id: 5},
+        {part: '1234', id: 6},
+        {part: '1234', id: 7},
+        {part: '1234', id: 8},
+        {part: '1234', id: 9},
+        {part: '1234', id: 10},
+        {part: '1234', id: 11},
+        {part: '1234', id: 12},
+        {part: '1234', id: 13},
+        {part: '1234', id: 14},
+        {part: '1234', id: 15},
+        {part: '1234', id: 16},
+        {part: '1234', id: 17},
+        {part: '1234', id: 18},
+        {part: '1234', id: 19},
+        {part: '1234', id: 20},
+        {part: '1234', id: 21},
+        {part: '1234', id: 22},
+        {part: '1234', id: 23},
+        {part: '1234', id: 24},
+        {part: '1234', id: 25},
+        {part: '1234', id: 26},
+        {}
+      ]
+    }
+
+    var store = new Ext.data.JsonStore({
+      fields: [
+        { name: 'part' }
+      ],
+      root: 'dataForecast'
+    });
+
+    store.loadData(storeData);
+
+    var grid = new Ext.grid.EditorGridPanel({
+      renderTo: 'gridGroup',
+      height:470,
+      store: store,
+      title:'Create Forecast',
+      clicksToEdit: 1,
+      colModel: new Ext.ux.grid.LockingColumnModel(columnT),
+      view: new Ext.ux.grid.LockingGridView({})
+    });
+
+    var fibasic = new Ext.ux.form.FileUploadField({
+      renderTo: 'formUpload',
+      width: 400
+    });
+  });
+</script>
+{{end}}

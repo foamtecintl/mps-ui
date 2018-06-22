@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"mps-go/pkg/app"
+	"mps-ui/pkg/app"
 	"net/http"
 )
 

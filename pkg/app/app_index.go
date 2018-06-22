@@ -1,7 +1,7 @@
 package app
 
 import (
-	"mps-go/pkg/view"
+	"mps-ui/pkg/view"
 	"net/http"
 )
 

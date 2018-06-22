@@ -115,7 +115,7 @@
             success: function(result) {
               console.log(result.message)
               Ext.MessageBox.hide();
-              window.location.href = '/mps/createpart?id={{.id}}';
+              window.location.href = '/mps/createpart?id={{.id}}&search=';
             },
             error: function(err) {
               Ext.MessageBox.hide();

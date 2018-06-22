@@ -29,14 +29,7 @@
     var h = 650;
     var left = (screen.width/2)-(w/2);
     var top = (screen.height/2)-(h/2);
-    // window.open('/login','winname','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width='+w+',height='+h+',top='+top+',left='+left);
-    var token = localStorage.getItem('token');
-    console.log(token);
-    if(token === null) {
-      window.open('/login','winname','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1000,height=650');
-    } else {
-      window.open('/mps','winname','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1000,height=650');
-    }
+    window.open('/login','winname','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width='+w+',height='+h+',top='+top+',left='+left);
   }
 
   MyDesktop = new Ext.app.App({
