@@ -17,9 +17,19 @@ func MpsHome(w http.ResponseWriter, data interface{}) {
 	render(parseTemplate("mps/home.html"), w, data)
 }
 
-// MpsCreateForcast render view
-func MpsCreateForcast(w http.ResponseWriter, data interface{}) {
-	render(parseTemplate("mps/create-forcast.html"), w, data)
+// MpsSelectForecast render view
+func MpsSelectForecast(w http.ResponseWriter, data interface{}) {
+	render(parseTemplate("mps/select-forecast.html"), w, data)
+}
+
+// MpsCreateForecast render view
+func MpsCreateForecast(w http.ResponseWriter, data interface{}) {
+	render(parseTemplate("mps/create-forecast.html"), w, data)
+}
+
+// MpsCreateDate render view
+func MpsCreateDate(w http.ResponseWriter, data interface{}) {
+	render(parseTemplate("mps/create-date.html"), w, data)
 }
 
 // MpsCreateGroup render view
