@@ -32,6 +32,15 @@ func mpsCreateForecast(w http.ResponseWriter, r *http.Request) {
 	view.MpsCreateForecast(w, data)
 }
 
+func mpsDetailForecast(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"api_url": apiURL,
+	}
+	no := r.URL.Query().Get("no")
+	data["no"] = no
+	view.MpsDetailForecast(w, data)
+}
+
 func mpsCreateDate(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"api_url": apiURL,
