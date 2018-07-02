@@ -70,6 +70,7 @@
       ],
       buttons: [{
         text: 'Add Part',
+        id:'btnAddPart',
         handler: function() {
           formCreatePart.getForm().submit();
           var partP = $('#part').val();
@@ -231,8 +232,8 @@
         ]
       })
     });
-    store.baseParams = {searchText: '{{.search}}'};
-    store.load({params:{start:0, limit:20, id:'{{.id}}'}, searchText: '{{.search}}'});
+    store.baseParams = {id:'{{.id}}', searchText: '{{.search}}'};
+    store.load({params:{start:0, limit:20, id:'{{.id}}', searchText: '{{.search}}'}});
 
     var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
     myMask.show();

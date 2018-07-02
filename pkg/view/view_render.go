@@ -27,6 +27,11 @@ func MpsCreateForecast(w http.ResponseWriter, data interface{}) {
 	render(parseTemplate("mps/create-forecast.html"), w, data)
 }
 
+// MpsDetailForecast render view
+func MpsDetailForecast(w http.ResponseWriter, data interface{}) {
+	render(parseTemplate("mps/forecast-detail.html"), w, data)
+}
+
 // MpsCreateDate render view
 func MpsCreateDate(w http.ResponseWriter, data interface{}) {
 	render(parseTemplate("mps/create-date.html"), w, data)

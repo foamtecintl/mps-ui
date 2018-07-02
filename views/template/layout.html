@@ -85,9 +85,11 @@
       },adminMenu,'->',{
         text: localStorage.getItem('username'),
         iconCls: 'user',
+        id: 'menuLoginLogout',
         menu: [
           {
             text: 'Logout',
+            id: 'btnLogout',
             handler: function(){
               localStorage.clear();
               window.location.href = '/login';

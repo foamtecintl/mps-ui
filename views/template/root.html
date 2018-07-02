@@ -24,21 +24,25 @@
       {{template "root-body" .}}
       {{template "root-script" .}}
       <script>
-      $.ajax({
-      type: 'GET',
-      contentType: 'application/json; charset=utf-8',
-      dataType: "json",
-      url: '{{.api_url}}/api/security/checkapionline',
-      error: function(err) {
-        Ext.MessageBox.show({
-          title: 'Warning',
-          msg: 'Server data offline',
-          buttons: Ext.MessageBox.OK,
-          animEl: 'mb9',
-          icon: Ext.MessageBox.WARNING
-        });
-      }
-    })
+        if(navigator.userAgent.toLowerCase().indexOf('firefox') < 0){
+          alert('please use firefox only');
+          window.location.href = 'https://www.mozilla.org/th/firefox/new/';
+        }
+        $.ajax({
+          type: 'GET',
+          contentType: 'application/json; charset=utf-8',
+          dataType: "json",
+          url: '{{.api_url}}/api/security/checkapionline',
+          error: function(err) {
+            Ext.MessageBox.show({
+              title: 'Warning',
+              msg: 'Server data offline',
+              buttons: Ext.MessageBox.OK,
+              animEl: 'mb9',
+              icon: Ext.MessageBox.WARNING
+            });
+          }
+        })
     </script>
   </body>
 </html>

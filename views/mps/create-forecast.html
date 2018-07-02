@@ -19,8 +19,20 @@
           html: '<div id="gridGroup"></div>'
         },
         {
-          columnWidth: 1,
-          html: '<div id="formUpload"></div>'
+          columnWidth: 0.1,
+          html: '<div>&nbsp;</div>'
+        },
+        {
+          columnWidth: 0.4,
+          html: '<br>&nbsp;<div id="formUpload"></div>'
+        },
+        {
+          columnWidth: 0.1,
+          html: '<div>&nbsp;</div>'
+        },
+        {
+          columnWidth: 0.4,
+          html: '<br>&nbsp;<div id="submitBtn"></div>'
         }
       ]
     });
@@ -29,67 +41,91 @@
     var dateSplit = dateArr.split(',');
     var columnT = [
       {
+        id: 'no',
+        header: '#',
+        dataIndex: 'no',
+        width    : 30,
+        locked: true
+      },
+      {
         id: 'part',
         header: 'Part',
         dataIndex: 'part',
         width    : 150,
         locked: true
+      },
+      {
+        id: 'id',
+        header: 'ID',
+        dataIndex: 'id',
+        width    : 1,
+        hidden: true
+      },
+      {
+        id: 'sap',
+        header: 'Code Sap',
+        dataIndex: 'sap',
+        width    : 1,
+        hidden: true
       }
     ];
+
+    var fieldsStore = [
+      { name: 'id' },
+      { name: 'no' },
+      { name: 'part' },
+      { name: 'sap' }
+    ];
+
     var i = 0;
     for(i = 0; i < dateSplit.length -1; i++) {
       var ob = {
-          id: 'date'+i,
+          id: dateSplit[i],
           header: dateSplit[i],
-          dataIndex: 'date'+i,
+          dataIndex: dateSplit[i],
           width    : 100,
           editor: {
-            xtype: 'textfield'
+            xtype: 'numberfield'
           }
       }
       columnT.push(ob);
+
+      var ofi = {
+        name: dateSplit[i]
+      }
+      fieldsStore.push(ofi);
     }
 
-    var storeData = {
-      dataForecast: [
-        {part: '1234', id: 1},
-        {part: '1234', id: 2},
-        {part: '1234', id: 3},
-        {part: '1234', id: 4},
-        {part: '1234', id: 5},
-        {part: '1234', id: 6},
-        {part: '1234', id: 7},
-        {part: '1234', id: 8},
-        {part: '1234', id: 9},
-        {part: '1234', id: 10},
-        {part: '1234', id: 11},
-        {part: '1234', id: 12},
-        {part: '1234', id: 13},
-        {part: '1234', id: 14},
-        {part: '1234', id: 15},
-        {part: '1234', id: 16},
-        {part: '1234', id: 17},
-        {part: '1234', id: 18},
-        {part: '1234', id: 19},
-        {part: '1234', id: 20},
-        {part: '1234', id: 21},
-        {part: '1234', id: 22},
-        {part: '1234', id: 23},
-        {part: '1234', id: 24},
-        {part: '1234', id: 25},
-        {part: '1234', id: 26},
-        {}
-      ]
-    }
+    var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
+    myMask.show();
 
     var store = new Ext.data.JsonStore({
-      fields: [
-        { name: 'part' }
-      ],
+      fields: fieldsStore,
       root: 'dataForecast'
     });
 
-    store.loadData(storeData);
+    $.ajax({
+      type: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': localStorage.getItem('token')
+      },
+      dataType: 'json',
+      url: '{{.api_url}}/api/mps/findgroupbyidanddate',
+      data: JSON.stringify({'id': '{{.id}}', 'dateT': dateArr}),
+      success: function(result) {
+        store.loadData(result);
+        myMask.hide();
+      },
+      error: function(err) {
+        myMask.hide();
+        var resErr = err.responseJSON;
+        if(resErr.message.indexOf('token fail') >= 0) {
+          localStorage.clear();
+          window.location.href = '/login';
+        }
+      }
+    });
 
     var grid = new Ext.grid.EditorGridPanel({
       renderTo: 'gridGroup',
@@ -102,8 +138,75 @@
     });
 
     var fibasic = new Ext.ux.form.FileUploadField({
+      id: 'fileUpload',
       renderTo: 'formUpload',
-      width: 400
+      width: 300
+    });
+
+    var btnSubmit = new Ext.Button({
+      width: 100,
+      renderTo: 'submitBtn',
+      text: 'Submit',
+      handler: function() {
+
+        Ext.MessageBox.show({
+          msg: 'Saving your data, please wait...',
+          progressText: 'Saving...',
+          width:300,
+          wait:true,
+          waitConfig: {interval:200},
+          icon:'ext-mb-download',
+          animEl: 'mb7'
+        });
+
+        var dataTable = grid.store.data.items;
+        var dataToBackend = {
+          groupId: '{{.id}}',
+          dataAll: []
+        };
+
+        dataTable.forEach(function(dataObject) {
+          var dataInput = {
+            id: dataObject.data.id,
+            part: dataObject.data.part,
+            sap: dataObject.data.sap
+          }
+          for(i = 0; i < dateSplit.length -1; i++) {
+            dataInput[dateSplit[i]] = dataObject.data[dateSplit[i]];
+          }
+          dataToBackend.dataAll.push(dataInput);
+        });
+
+        var formData = new FormData();
+        formData.append('data', JSON.stringify(dataToBackend));
+        formData.append('file', $('#fileUpload-file')[0].files[0]);
+
+        $.ajax({
+          type: 'POST',
+          headers: {
+            Accept: 'application/json',
+            Authorization: localStorage.getItem('token')
+          },
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          url: '{{.api_url}}/api/mps/createforcast',
+          processData: false,
+          contentType: false,
+          data: formData,
+          success: function(result) {
+            Ext.MessageBox.hide();
+            window.location.href = '/mps/detailforecast?no=' + result.forecastNumber;
+          },
+          error: function(err) {
+            Ext.MessageBox.hide();
+            var resErr = err.responseJSON;
+            if(resErr.message.indexOf('token fail') >= 0) {
+              localStorage.clear();
+              window.location.href = '/login';
+            }
+          }
+        });
+      }
     });
   });
 </script>
