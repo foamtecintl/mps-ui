@@ -6,6 +6,8 @@
 <script>
   Ext.onReady(function() {
 
+    var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
+
     var panel = new Ext.Panel({
       renderTo: 'content',
       layout: 'column',
@@ -196,13 +198,61 @@
           id: 'partName',
           header: 'Part Name',
           dataIndex: 'partName',
-          width    : 270
+          width    : 190
         },
         {
           id: 'codeSap',
           header: 'Code SAP',
           dataIndex: 'codeSap',
           width    : 170
+        },
+        {
+          xtype: 'actioncolumn',
+          header: 'Remove',
+          width: 60,
+          items: [
+            {
+              icon: '/-/core/extjs/examples/icons/fam/delete.gif',
+              tooltip: 'go to infomation',
+              handler: function(grid, rowIndex, colIndex) {
+                var rec = store.getAt(rowIndex);
+                Ext.MessageBox.show({
+                  title: 'Confirm',
+                  msg: 'Are you sure you want to delete part ' + rec.get('partNumber') + '?',
+                  buttons: Ext.MessageBox.OKCANCEL,
+                  animEl: 'mb9',
+                  icon: Ext.MessageBox.QUESTION,
+                  fn: function(btn){
+                    if(btn == 'ok'){
+                      myMask.show();
+                      $.ajax({
+                        type: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json; charset=utf-8',
+                          'Authorization': localStorage.getItem('token')
+                        },
+                        dataType: 'json',
+                        url: '{{.api_url}}/api/mps/deletepart',
+                        data: JSON.stringify({'id': rec.get('id')}),
+                        success: function(result) {
+                          myMask.hide();
+                          window.location.href = '/mps/createpart?id={{.id}}&search=';
+                        },
+                        error: function(err) {
+                          myMask.hide();
+                          var resErr = err.responseJSON;
+                          if(resErr.message.indexOf('token fail') >= 0) {
+                            localStorage.clear();
+                            window.location.href = '/login';
+                          }
+                        }
+                      });
+                    }
+                  }
+                });
+              }
+            }
+          ]
         }
       ],
       bbar: new Ext.PagingToolbar({
@@ -235,7 +285,6 @@
     store.baseParams = {id:'{{.id}}', searchText: '{{.search}}'};
     store.load({params:{start:0, limit:20, id:'{{.id}}', searchText: '{{.search}}'}});
 
-    var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
     myMask.show();
 
     $.ajax({
