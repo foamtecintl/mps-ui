@@ -23,8 +23,8 @@
           html: '<div>&nbsp;</div>'
         },
         {
-          columnWidth: 0.4,
-          html: '<br>&nbsp;<div id="formUpload"></div>'
+          columnWidth: 0.3,
+          html: '&nbsp;<div id="formUploadInput"></div>'
         },
         {
           columnWidth: 0.1,
@@ -35,6 +35,34 @@
           html: '<br>&nbsp;<div id="submitBtn"></div>'
         }
       ]
+    });
+
+    var formUploadInput = new Ext.FormPanel({
+      renderTo: 'formUploadInput',
+      labelWidth: 75,
+      frame:true,
+      defaults: {width: 200},
+      items: [
+        {
+          xtype: 'fileuploadfield',
+          fieldLabel: 'Import Excel',
+          name: 'importExcel',
+          emptyText: 'Select an excel file',
+          id: 'importExcel',
+          buttonText: 'Import',
+        }
+      ],
+      buttons: [{
+        html: '<a href="#">Download template</a>',
+        handler: function(){
+          window.open('{{.api_url}}/api/mps/downloadexceltemplate?id={{.id}}&dateT={{.dateT}}', 'excel', 'height=200,width=200');
+        }
+      },{
+        text: 'Update Data',
+        handler: function(){
+          
+        }
+      }]
     });
 
     var dateArr = '{{.dateT}}';
@@ -137,77 +165,77 @@
       view: new Ext.ux.grid.LockingGridView({})
     });
 
-    var fibasic = new Ext.ux.form.FileUploadField({
-      id: 'fileUpload',
-      renderTo: 'formUpload',
-      width: 300
-    });
+    // var fibasic = new Ext.ux.form.FileUploadField({
+    //   id: 'fileUpload',
+    //   renderTo: 'formUpload',
+    //   width: 300
+    // });
 
-    var btnSubmit = new Ext.Button({
-      width: 100,
-      renderTo: 'submitBtn',
-      text: 'Submit',
-      handler: function() {
+    // var btnSubmit = new Ext.Button({
+    //   width: 100,
+    //   renderTo: 'submitBtn',
+    //   text: 'Submit',
+    //   handler: function() {
 
-        Ext.MessageBox.show({
-          msg: 'Saving your data, please wait...',
-          progressText: 'Saving...',
-          width:300,
-          wait:true,
-          waitConfig: {interval:200},
-          icon:'ext-mb-download',
-          animEl: 'mb7'
-        });
+    //     Ext.MessageBox.show({
+    //       msg: 'Saving your data, please wait...',
+    //       progressText: 'Saving...',
+    //       width:300,
+    //       wait:true,
+    //       waitConfig: {interval:200},
+    //       icon:'ext-mb-download',
+    //       animEl: 'mb7'
+    //     });
 
-        var dataTable = grid.store.data.items;
-        var dataToBackend = {
-          groupId: '{{.id}}',
-          dataAll: []
-        };
+    //     var dataTable = grid.store.data.items;
+    //     var dataToBackend = {
+    //       groupId: '{{.id}}',
+    //       dataAll: []
+    //     };
 
-        dataTable.forEach(function(dataObject) {
-          var dataInput = {
-            id: dataObject.data.id,
-            part: dataObject.data.part,
-            sap: dataObject.data.sap
-          }
-          for(i = 0; i < dateSplit.length -1; i++) {
-            dataInput[dateSplit[i]] = dataObject.data[dateSplit[i]];
-          }
-          dataToBackend.dataAll.push(dataInput);
-        });
+    //     dataTable.forEach(function(dataObject) {
+    //       var dataInput = {
+    //         id: dataObject.data.id,
+    //         part: dataObject.data.part,
+    //         sap: dataObject.data.sap
+    //       }
+    //       for(i = 0; i < dateSplit.length -1; i++) {
+    //         dataInput[dateSplit[i]] = dataObject.data[dateSplit[i]];
+    //       }
+    //       dataToBackend.dataAll.push(dataInput);
+    //     });
 
-        var formData = new FormData();
-        formData.append('data', JSON.stringify(dataToBackend));
-        formData.append('file', $('#fileUpload-file')[0].files[0]);
+    //     var formData = new FormData();
+    //     formData.append('data', JSON.stringify(dataToBackend));
+    //     formData.append('file', $('#fileUpload-file')[0].files[0]);
 
-        $.ajax({
-          type: 'POST',
-          headers: {
-            Accept: 'application/json',
-            Authorization: localStorage.getItem('token')
-          },
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-          url: '{{.api_url}}/api/mps/createforcast',
-          processData: false,
-          contentType: false,
-          data: formData,
-          success: function(result) {
-            Ext.MessageBox.hide();
-            window.location.href = '/mps/detailforecast?no=' + result.forecastNumber;
-          },
-          error: function(err) {
-            Ext.MessageBox.hide();
-            var resErr = err.responseJSON;
-            if(resErr.message.indexOf('token fail') >= 0) {
-              localStorage.clear();
-              window.location.href = '/login';
-            }
-          }
-        });
-      }
-    });
+    //     $.ajax({
+    //       type: 'POST',
+    //       headers: {
+    //         Accept: 'application/json',
+    //         Authorization: localStorage.getItem('token')
+    //       },
+    //       contentType: "application/json; charset=utf-8",
+    //       dataType: "json",
+    //       url: '{{.api_url}}/api/mps/createforcast',
+    //       processData: false,
+    //       contentType: false,
+    //       data: formData,
+    //       success: function(result) {
+    //         Ext.MessageBox.hide();
+    //         window.location.href = '/mps/detailforecast?no=' + result.forecastNumber;
+    //       },
+    //       error: function(err) {
+    //         Ext.MessageBox.hide();
+    //         var resErr = err.responseJSON;
+    //         if(resErr.message.indexOf('token fail') >= 0) {
+    //           localStorage.clear();
+    //           window.location.href = '/login';
+    //         }
+    //       }
+    //     });
+    //   }
+    // });
   });
 </script>
 {{end}}
