@@ -10,6 +10,9 @@
 {{end}} {{define "root-script"}}
 <script>
   Ext.onReady(function() {
+
+    var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
+
     var panel = new Ext.Panel({
       renderTo: 'content',
       layout: 'column',
@@ -37,34 +40,6 @@
       ]
     });
 
-    var formUploadInput = new Ext.FormPanel({
-      renderTo: 'formUploadInput',
-      labelWidth: 75,
-      frame:true,
-      defaults: {width: 200},
-      items: [
-        {
-          xtype: 'fileuploadfield',
-          fieldLabel: 'Import Excel',
-          name: 'importExcel',
-          emptyText: 'Select an excel file',
-          id: 'importExcel',
-          buttonText: 'Import',
-        }
-      ],
-      buttons: [{
-        html: '<a href="#">Download template</a>',
-        handler: function(){
-          window.open('{{.api_url}}/api/mps/downloadexceltemplate?id={{.id}}&dateT={{.dateT}}', 'excel', 'height=200,width=200');
-        }
-      },{
-        text: 'Update Data',
-        handler: function(){
-          
-        }
-      }]
-    });
-
     var dateArr = '{{.dateT}}';
     var dateSplit = dateArr.split(',');
     var columnT = [
@@ -83,16 +58,16 @@
         locked: true
       },
       {
+        id: 'sap',
+        header: 'Code SAP',
+        dataIndex: 'sap',
+        width    : 150,
+        locked: true
+      },
+      {
         id: 'id',
         header: 'ID',
         dataIndex: 'id',
-        width    : 1,
-        hidden: true
-      },
-      {
-        id: 'sap',
-        header: 'Code Sap',
-        dataIndex: 'sap',
         width    : 1,
         hidden: true
       }
@@ -124,7 +99,6 @@
       fieldsStore.push(ofi);
     }
 
-    var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
     myMask.show();
 
     var store = new Ext.data.JsonStore({
@@ -236,6 +210,73 @@
     //     });
     //   }
     // });
+
+    var formUploadInput = new Ext.FormPanel({
+      renderTo: 'formUploadInput',
+      labelWidth: 75,
+      frame:true,
+      defaults: {width: 200},
+      items: [
+        {
+          xtype: 'fileuploadfield',
+          fieldLabel: 'Import Excel',
+          name: 'importExcel',
+          emptyText: 'Select an excel file',
+          id: 'importExcel',
+          buttonText: 'Import',
+        }
+      ],
+      buttons: [{
+        html: '<a href="#">Download template</a>',
+        handler: function(){
+          window.open('{{.api_url}}/api/mps/downloadexceltemplate?id={{.id}}&dateT={{.dateT}}', 'excel', 'height=200,width=200');
+        }
+      },{
+        text: 'Update Data',
+        handler: function(){
+          myMask.show();
+          var formDataUpdate = new FormData();
+          formDataUpdate.append('file', $('#importExcel-file')[0].files[0]);
+
+          $.ajax({
+            type: 'POST',
+            headers: {
+              Accept: 'application/json',
+              Authorization: localStorage.getItem('token')
+            },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '{{.api_url}}/api/mps/updateforecastbyexcelfile',
+            processData: false,
+            contentType: false,
+            data: formDataUpdate,
+            success: function(result) {
+              var dataTable = grid.store.data.items;
+              var newRow = 0;
+              console.log(Object.keys(result.dataForecast[0]));
+              dataTable.forEach(function(dataObject) {
+                var dataRow = result.dataForecast[newRow];
+                var listData = Object.keys(dataObject.data);
+                listData.forEach(function(dataKey) {
+                  var models = grid.getStore().getRange();
+                  models[newRow].set(dataKey, dataRow[dataKey]);
+                });
+                newRow++;
+              });
+              myMask.hide();
+            },
+            error: function(err) {
+              myMask.hide();
+              var resErr = err.responseJSON;
+              if(resErr.message.indexOf('token fail') >= 0) {
+                localStorage.clear();
+                window.location.href = '/login';
+              }
+            }
+          });
+        }
+      }]
+    });
   });
 </script>
 {{end}}
