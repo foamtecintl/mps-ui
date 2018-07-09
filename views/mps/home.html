@@ -1,10 +1,262 @@
 {{define "root-style"}}
 {{end}}
 {{define "root-body"}}
+<div id="body"></div>
 {{end}} {{define "root-script"}}
 <script>
   Ext.onReady(function() {
-    
+    var panel = new Ext.Panel({
+      renderTo: 'content',
+      layout: 'column',
+      items: [
+        {
+          columnWidth: .15,
+          html: '<div>&nbsp;</div>'
+        },
+        {
+          columnWidth: .7,
+          html: '<div id="gridDashboard"></div>'
+        },
+        {
+          columnWidth: .15,
+          html: '<div>&nbsp;</div>'
+        },
+        {
+          columnWidth: 1,
+          html: '<div><br></div>'
+        },
+        {
+          columnWidth: .15,
+          html: '<div>&nbsp;</div>'
+        },
+        {
+          columnWidth: .7,
+          html: '<div id="gridPart"></div>'
+        },
+        {
+          columnWidth: .15,
+          html: '<div>&nbsp;</div>'
+        }
+      ]
+    });
+
+    var store = new Ext.data.JsonStore({
+      fields: [
+        { name: 'id' },
+        { name: 'no' },
+        { name: 'forecastNo' },
+        { name: 'groupName' },
+        { name: 'totalPart' },
+        { name: 'createDate' }
+      ],
+      root: 'dashborad',
+      totalProperty: 'totalItem',
+      proxy: new Ext.data.HttpProxy({
+        method: 'GET',
+        type: 'json',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': localStorage.getItem('token')
+        },
+        url: '{{.api_url}}/api/mps/searchdashboardslimit'
+      })
+    });
+
+    new Ext.grid.GridPanel({
+      renderTo: 'gridDashboard',
+      height:250,
+      store: store,
+      trackMouseOver:false,
+      disableSelection:true,
+      loadMask: true,
+      title:'Forecast History',
+      columns:[
+        {
+          id: 'id',
+          header: 'id',
+          dataIndex: 'id',
+          width    : 10,
+          hidden: true
+        },
+        {
+          id: 'no',
+          header: '#',
+          dataIndex: 'no',
+          width    : 50
+        },
+        {
+          id: 'forecastNo',
+          header: 'Forecast Number',
+          dataIndex: 'forecastNo',
+          width    : 180
+        },
+        {
+          id: 'groupName',
+          header: 'Group Name',
+          dataIndex: 'groupName',
+          sortable: true,
+          width    : 200
+        },
+        {
+          id: 'totalPart',
+          header: 'Total Part',
+          dataIndex: 'totalPart',
+          width    : 80
+        },
+        {
+          id: 'createDate',
+          header: 'Create Date',
+          dataIndex: 'createDate',
+          width    : 130
+        },
+        {
+          xtype: 'actioncolumn',
+          header: 'Detail Forecast',
+          width: 100,
+          items: [
+            {
+              icon: '/-/core/extjs/examples/icons/fam/rss_go.png',
+              tooltip: 'go to infomation',
+              handler: function(grid, rowIndex, colIndex) {
+                var rec = store.getAt(rowIndex);
+                window.location.href = '/mps/detailforecast?no=' + rec.get('forecastNo');
+              }
+            }
+          ]
+        }
+      ],
+      bbar: new Ext.PagingToolbar({
+        pageSize: 10,
+        store: store,
+        displayInfo: true,
+        displayMsg: 'Displaying data {0} - {1} of {2}',
+        emptyMsg: "No data to display",
+        items: ['-',
+          {
+            xtype: 'textfield',
+            fieldLabel: 'Search',
+            name: 'search',
+            id: 'search',
+            value: '{{.search}}'
+          },
+          {
+            xtype: 'button',
+            name: 'btnSearch',
+            id: 'btnSearch',
+            text: 'Search',
+            pressed: true,
+            handler: function() {
+              window.location.href = '/mps?search=' + $('#search').val() + '&searchPart=' + $('#searchPart').val();
+            }
+          }
+        ]
+      })
+    });
+
+    store.baseParams = {searchText: '{{.search}}'};
+    store.load({params:{start:0, limit:10, searchText: '{{.search}}'}});
+
+    var storePart = new Ext.data.JsonStore({
+      fields: [
+        { name: 'id' },
+        { name: 'no' },
+        { name: 'part' },
+        { name: 'groupName' }
+      ],
+      root: 'dashboardPart',
+      totalProperty: 'totalItemPart',
+      proxy: new Ext.data.HttpProxy({
+        method: 'GET',
+        type: 'json',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': localStorage.getItem('token')
+        },
+        url: '{{.api_url}}/api/mps/searchdashboardspartlimit'
+      })
+    });
+
+    new Ext.grid.GridPanel({
+      renderTo: 'gridPart',
+      height:250,
+      store: storePart,
+      trackMouseOver:false,
+      disableSelection:true,
+      loadMask: true,
+      title:'Part History Forecast',
+      columns:[
+        {
+          id: 'id',
+          header: 'id',
+          dataIndex: 'id',
+          width    : 10,
+          hidden: true
+        },
+        {
+          id: 'no',
+          header: '#',
+          dataIndex: 'no',
+          width    : 50
+        },
+        {
+          id: 'part',
+          header: 'Part Number',
+          dataIndex: 'part',
+          width    : 250
+        },
+        {
+          id: 'groupName',
+          header: 'Group Name',
+          dataIndex: 'groupName',
+          sortable: true,
+          width    : 200
+        },
+        {
+          xtype: 'actioncolumn',
+          header: 'History Forecast',
+          width: 100,
+          items: [
+            {
+              icon: '/-/core/extjs/examples/icons/fam/rss_go.png',
+              tooltip: 'go to infomation',
+              handler: function(grid, rowIndex, colIndex) {
+                var rec = store.getAt(rowIndex);
+                // window.location.href = '/mps/detailforecast?no=' + rec.get('forecastNo');
+              }
+            }
+          ]
+        }
+      ],
+      bbar: new Ext.PagingToolbar({
+        pageSize: 10,
+        store: storePart,
+        displayInfo: true,
+        displayMsg: 'Displaying data {0} - {1} of {2}',
+        emptyMsg: "No data to display",
+        items: ['-',
+          {
+            xtype: 'textfield',
+            fieldLabel: 'Search',
+            name: 'searchPart',
+            id: 'searchPart',
+            value: '{{.searchPart}}'
+          },
+          {
+            xtype: 'button',
+            name: 'btnSearchPart',
+            id: 'btnSearchPart',
+            text: 'Search',
+            pressed: true,
+            handler: function() {
+              window.location.href = '/mps?search=' + $('#search').val() + '&searchPart=' + $('#searchPart').val();
+            }
+          }
+        ]
+      })
+    });
+
+    storePart.baseParams = {searchText: '{{.searchPart}}'};
+    storePart.load({params:{start:0, limit:10, searchText: '{{.searchPart}}'}});
   });
 </script>
 {{end}}

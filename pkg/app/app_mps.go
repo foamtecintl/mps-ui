@@ -9,6 +9,10 @@ func mpsHome(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"api_url": apiURL,
 	}
+	search := r.URL.Query().Get("search")
+	searchPart := r.URL.Query().Get("searchPart")
+	data["search"] = search
+	data["searchPart"] = searchPart
 	view.MpsHome(w, data)
 }
 
