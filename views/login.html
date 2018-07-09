@@ -74,7 +74,7 @@
                 localStorage.setItem('token' , 'Bearer ' + result.token);
                 localStorage.setItem('username' , result.username);
                 localStorage.setItem('role' , result.role);
-                window.location.href = '/mps';
+                window.location.href = '/mps?search=&searchPart=';
               },
               error: function(err) {
                 myMask.hide();
