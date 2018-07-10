@@ -206,6 +206,15 @@
           error: function(err) {
             Ext.MessageBox.hide();
             var resErr = err.responseJSON;
+            if(resErr.message.indexOf("Not file upload.") >= 0) {
+              Ext.MessageBox.show({
+                title: 'Warning',
+                msg: resErr.message,
+                buttons: Ext.MessageBox.OK,
+                animEl: 'mb9',
+                icon: Ext.MessageBox.WARNING
+              });
+            }
             if(resErr.message.indexOf('token fail') >= 0) {
               localStorage.clear();
               window.location.href = '/login';

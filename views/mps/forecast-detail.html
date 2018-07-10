@@ -58,6 +58,7 @@
       buttons: [{
         text: 'Download File',
         handler: function() {
+          window.open('{{.api_url}}/api/mps/file/{{.no}}', 'file', 'height=200,width=200');
         }
       }]
     });
